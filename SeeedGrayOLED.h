@@ -1,27 +1,27 @@
 /*
- * SeeedGrayOLED.cpp
- * SSD1327 Gray OLED Driver Library
- *
- * Copyright (c) 2011 seeed technology inc.
- * Author        :   Visweswara R
- * Create Time   :   Dec 2011
- * Change Log    :
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
- 
+    SeeedGrayOLED.cpp
+    SSD1327 Gray OLED Driver Library
+
+    Copyright (c) 2011 seeed technology inc.
+    Author        :   Visweswara R
+    Create Time   :   Dec 2011
+    Change Log    :
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 #ifndef SeeedGrayOLED_data_H
 #define SeeedGrayOLED_data_H
 
@@ -33,7 +33,7 @@
 
 #define SH1107G  1
 #define SSD1327  2
- 
+
 #define VERTICAL_MODE                       01
 #define HORIZONTAL_MODE                     02
 
@@ -65,52 +65,53 @@
 
 class SeeedGrayOLED {
 
-public:
+  public:
 
-char addressingMode;
+    char addressingMode;
 
-void init(int IC);
+    void init(int IC);
 
-void setNormalDisplay();
-void setInverseDisplay();
+    void setNormalDisplay();
+    void setInverseDisplay();
 
-void sendCommand(unsigned char command);
-void sendData(unsigned char Data);
-void setGrayLevel(unsigned char grayLevel);
+    void sendCommand(unsigned char command);
+    void sendData(unsigned char Data);
+    void setGrayLevel(unsigned char grayLevel);
 
-void setVerticalMode();
-void setHorizontalMode();
+    void setVerticalMode();
+    void setHorizontalMode();
 
-void setTextXY(unsigned char Row, unsigned char Column);
-void clearDisplay();
-void setContrastLevel(unsigned char ContrastLevel);
-void putChar(unsigned char c);
-void putString(const char *String);
-unsigned char putNumber(long n);
-unsigned char putFloat(float floatNumber,unsigned char decimal);
-unsigned char putFloat(float floatNumber);
+    void setTextXY(unsigned char Row, unsigned char Column);
+    void clearDisplay();
+    void setContrastLevel(unsigned char ContrastLevel);
+    void putChar(unsigned char c);
+    void putString(const char* String);
+    unsigned char putNumber(long n);
+    unsigned char putFloat(float floatNumber, unsigned char decimal);
+    unsigned char putFloat(float floatNumber);
 
-void drawBitmap(const unsigned char *bitmaparray,int bytes);
+    void drawBitmap(const unsigned char* bitmaparray, int bytes);
 
-void setHorizontalScrollProperties(bool direction,unsigned char startRow, unsigned char endRow,unsigned char startColumn, unsigned char endColumn, unsigned char scrollSpeed);
-void activateScroll();
-void deactivateScroll();
+    void setHorizontalScrollProperties(bool direction, unsigned char startRow, unsigned char endRow,
+                                       unsigned char startColumn, unsigned char endColumn, unsigned char scrollSpeed);
+    void activateScroll();
+    void deactivateScroll();
 
-void initSoftwareI2C(SoftwareI2C *w, int __sda, int __scl);
+    void initSoftwareI2C(SoftwareI2C* w, int __sda, int __scl);
 
 
-private:
+  private:
 
-unsigned char grayH;
-unsigned char grayL;
-int Drive_IC;
+    unsigned char grayH;
+    unsigned char grayL;
+    int Drive_IC;
 
-SoftwareI2C *Wire;
+    SoftwareI2C* Wire;
 
 
 };
 
-extern SeeedGrayOLED SeeedGrayOled;  // SeeedGrayOLED object 
+extern SeeedGrayOLED SeeedGrayOled;  // SeeedGrayOLED object
 
 #endif
 
