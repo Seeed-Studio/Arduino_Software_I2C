@@ -1,4 +1,4 @@
-Arduino_SoftWareI2C
+Arduino_SoftWareI2C  [![Build Status](https://travis-ci.com/Seeed-Studio/Arduino_Software_I2C.svg?branch=master)](https://travis-ci.com/Seeed-Studio/Arduino_Software_I2C)
 ===============
 
 
