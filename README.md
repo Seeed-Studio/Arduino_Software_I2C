@@ -6,8 +6,7 @@ This is an Arduino software I2C Library, you can use the other pin as I2C interf
 
 But, you should know that this library can only act as Master.
 
-available()
-
+And, Wire.available() is not correctly supported.
 
 This library include:
 
