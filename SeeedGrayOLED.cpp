@@ -28,7 +28,11 @@
 
 #include "SeeedGrayOLED.h"
 
-#include <avr/pgmspace.h>
+#if defined(ESP32)
+  #include <pgmspace.h>
+#else
+  #include <avr/pgmspace.h>
+#endif
 
 #if defined(__arm__) && !defined(PROGMEM)
     #define PROGMEM
@@ -318,8 +322,8 @@ void SeeedGrayOLED::putChar(unsigned char C) {
             for (char j = 0; j < 8; j++) {
                 // Character is constructed two pixel at a time using vertical mode from the default 8x8 font
                 char c = 0x00;
-                char bit1 = (pgm_read_byte(&BasicFont[C - 32][i]) >> j)  & 0x01;
-                char bit2 = (pgm_read_byte(&BasicFont[C - 32][i + 1]) >> j) & 0x01;
+                char bit1 = (pgm_read_byte(&BasicFont[C - 32][(uint8_t) i]) >> j)  & 0x01;
+                char bit2 = (pgm_read_byte(&BasicFont[C - 32][(uint8_t) i + 1]) >> j) & 0x01;
                 // Each bit is changed to a nibble
                 c |= (bit1) ? grayH : 0x00;
                 c |= (bit2) ? grayL : 0x00;
