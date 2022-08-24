@@ -69,7 +69,7 @@ class SoftwareI2C {
     uchar endTransmission();
 
     uchar write(uchar dta);
-    uchar write(uchar len, uchar* dta);
+    uchar write(const uchar* dta, const uchar len);
     uchar requestFrom(uchar addr, uchar len);
     uchar read();
     uchar available() {

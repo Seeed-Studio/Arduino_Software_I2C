@@ -185,7 +185,7 @@ uchar SoftwareI2C::write(uchar dta) {
                 dta - array to be sent
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
-uchar SoftwareI2C::write(uchar len, uchar* dta) {
+uchar SoftwareI2C::write(const uchar* dta, const uchar len) {
     for (int i = 0; i < len; i++) {
 
         if (GETACK != write(dta[i])) {
@@ -208,7 +208,9 @@ uchar SoftwareI2C::requestFrom(uchar addr, uchar len) {
     recv_len = len;
     uchar ret = sendByteAck((addr << 1) + 1);   // send write address and get ack
     //sclSet(LOW);
-    return ret;
+    if(ret == GETACK)
+        return len;
+    return 0;
 }
 
 /*************************************************************************************************
@@ -223,10 +225,10 @@ uchar SoftwareI2C::read() {
     }
 
     uchar ucRt = 0;
-
+    sclSet(LOW);
     pinMode(pinSda, INPUT);
     sda_in_out = INPUT;
-
+    delayMicroseconds(8);
     for (int i = 0; i < 8; i++) {
         unsigned  char  ucBit;
         sclSet(LOW);
@@ -245,12 +247,14 @@ uchar SoftwareI2C::read() {
         sdaSet(LOW);                                                // sdaSet(LOW)
         delayMicroseconds(5);
         sclSet(HIGH);                                               //  sclSet(LOW)
+        delayMicroseconds(5);
         sclSet(LOW);
     } else {                // send NAK
         sclSet(LOW);                                                // sclSet(HIGH)
         sdaSet(HIGH);                                               // sdaSet(LOW)
         delayMicroseconds(5);
         sclSet(HIGH);                                               //  sclSet(LOW)
+        delayMicroseconds(5);
         sclSet(LOW);
         sendStop();
     }
