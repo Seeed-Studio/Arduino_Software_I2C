@@ -86,6 +86,7 @@ uchar SoftwareI2C::getAck(void) {
         }
 
         if (micros() - timer_t > 100) {
+            sdaSet(HIGH);
             return GETNAK;
         }
     }
