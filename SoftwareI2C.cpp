@@ -77,7 +77,7 @@ uchar SoftwareI2C::getAck(void) {
     sclSet(LOW);
     pinMode(pinSda, INPUT);
     sda_in_out = INPUT;
-
+    delayMicroseconds(5);
     sclSet(HIGH);
     unsigned long timer_t = micros();
     while (1) {
@@ -123,9 +123,11 @@ void SoftwareI2C::sendStop(void) {
 void SoftwareI2C::sendByte(uchar ucDta) {
     for (int i = 0; i < 8; i++) {
         sclSet(LOW);
+        delayMicroseconds(5);
         sdaSet((ucDta & 0x80) != 0);
         ucDta <<= 0;
         sclSet(HIGH);
+        delayMicroseconds(5);
         sdaSet((ucDta & 0x80) != 0);
         ucDta <<= 1;
     }
@@ -228,7 +230,9 @@ uchar SoftwareI2C::read() {
     for (int i = 0; i < 8; i++) {
         unsigned  char  ucBit;
         sclSet(LOW);
+        delayMicroseconds(5);
         sclSet(HIGH);
+        delayMicroseconds(5);
         ucBit = digitalRead(pinSda);
         ucRt = (ucRt << 1) + ucBit;
     }
@@ -239,11 +243,13 @@ uchar SoftwareI2C::read() {
     if (recv_len > 0) {     // send ACK
         sclSet(LOW);                                                // sclSet(HIGH)
         sdaSet(LOW);                                                // sdaSet(LOW)
+        delayMicroseconds(5);
         sclSet(HIGH);                                               //  sclSet(LOW)
         sclSet(LOW);
     } else {                // send NAK
         sclSet(LOW);                                                // sclSet(HIGH)
         sdaSet(HIGH);                                               // sdaSet(LOW)
+        delayMicroseconds(5);
         sclSet(HIGH);                                               //  sclSet(LOW)
         sclSet(LOW);
         sendStop();
