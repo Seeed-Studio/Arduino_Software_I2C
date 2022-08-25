@@ -206,12 +206,15 @@ uchar SoftwareI2C::write(const uchar* dta, const uchar len) {
 *************************************************************************************************/
 uchar SoftwareI2C::requestFrom(uchar addr, uchar len) {
     sendStart();                       // start signal
-    recv_len = len;
     uchar ret = sendByteAck((addr << 1) + 1);   // send write address and get ack
     //sclSet(LOW);
-    if(ret == GETACK)
-        return len;
-    return 0;
+    if(ret == GETNAK)
+    {
+        recv_len = 0;
+        return 0;
+    }
+    recv_len = len;
+    return len;
 }
 
 /*************************************************************************************************
