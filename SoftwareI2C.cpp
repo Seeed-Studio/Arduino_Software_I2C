@@ -20,10 +20,16 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <Arduino.h>
-
 #include "SoftwareI2C.h"
-
+#include <Arduino.h>
+#ifdef USE_FREERTOS
+#include <Seeed_Arduino_ooFreeRTOS.h>
+#define ENTER_CRITICAL() portENTER_CRITICAL()
+#define EXIT_CRITICAL() portEXIT_CRITICAL()
+#else
+#define ENTER_CRITICAL()
+#define EXIT_CRITICAL()
+#endif
 /*************************************************************************************************
     Function Name: begin
     Description:  config IO
@@ -66,7 +72,6 @@ void SoftwareI2C::sclSet(uchar ucDta) {
     digitalWrite(pinScl, ucDta);
 }
 
-
 /*************************************************************************************************
     Function Name: getAck
     Description:  get ack
@@ -81,7 +86,7 @@ uchar SoftwareI2C::getAck(void) {
     sclSet(HIGH);
     unsigned long timer_t = micros();
     while (1) {
-        if (!digitalRead(pinSda)) {                             // get ack
+        if (!digitalRead(pinSda)) { // get ack
             return GETACK;
         }
 
@@ -152,9 +157,11 @@ uchar SoftwareI2C::sendByteAck(uchar ucDta) {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::beginTransmission(uchar addr) {
-    sendStart();                            // start signal
-    uchar ret = sendByteAck(addr << 1);     // send write address and get ack
-    //sclSet(LOW);
+    ENTER_CRITICAL();
+    sendStart();                        // start signal
+    uchar ret = sendByteAck(addr << 1); // send write address and get ack
+    EXIT_CRITICAL();
+    // sclSet(LOW);
     return ret;
 }
 
@@ -176,7 +183,10 @@ uchar SoftwareI2C::endTransmission() {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::write(uchar dta) {
-    return sendByteAck(dta);
+    ENTER_CRITICAL();
+    uchar ret = sendByteAck(dta);
+    EXIT_CRITICAL();
+    return ret;
 }
 
 /*************************************************************************************************
@@ -186,14 +196,16 @@ uchar SoftwareI2C::write(uchar dta) {
                 dta - array to be sent
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
-uchar SoftwareI2C::write(const uchar* dta, const uchar len) {
+uchar SoftwareI2C::write(const uchar *dta, const uchar len) {
+    ENTER_CRITICAL();
     for (int i = 0; i < len; i++) {
 
         if (GETACK != write(dta[i])) {
+            EXIT_CRITICAL();
             return GETNAK;
         }
     }
-
+    EXIT_CRITICAL();
     return GETACK;
 }
 
@@ -205,11 +217,12 @@ uchar SoftwareI2C::write(const uchar* dta, const uchar len) {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::requestFrom(uchar addr, uchar len) {
-    sendStart();                       // start signal
-    uchar ret = sendByteAck((addr << 1) + 1);   // send write address and get ack
-    //sclSet(LOW);
-    if(ret == GETNAK)
-    {
+    ENTER_CRITICAL();
+    sendStart();                              // start signal
+    uchar ret = sendByteAck((addr << 1) + 1); // send write address and get ack
+    // sclSet(LOW);
+    EXIT_CRITICAL();
+    if (ret == GETNAK) {
         recv_len = 0;
         return 0;
     }
@@ -227,41 +240,42 @@ uchar SoftwareI2C::read() {
     if (!recv_len) {
         return 0;
     }
-
+    ENTER_CRITICAL();
     uchar ucRt = 0;
     sclSet(LOW);
     pinMode(pinSda, INPUT);
     sda_in_out = INPUT;
     delayMicroseconds(8);
     for (int i = 0; i < 8; i++) {
-        unsigned  char  ucBit;
+        unsigned char ucBit;
         sclSet(LOW);
         delayMicroseconds(5);
         sclSet(HIGH);
         delayMicroseconds(5);
         ucBit = digitalRead(pinSda);
-        ucRt = (ucRt << 1) + ucBit;
+        ucRt  = (ucRt << 1) + ucBit;
     }
 
     uchar dta = ucRt;
     recv_len--;
 
-    if (recv_len > 0) {     // send ACK
-        sclSet(LOW);                                                // sclSet(HIGH)
-        sdaSet(LOW);                                                // sdaSet(LOW)
+    if (recv_len > 0) { // send ACK
+        sclSet(LOW);    // sclSet(HIGH)
+        sdaSet(LOW);    // sdaSet(LOW)
         delayMicroseconds(5);
-        sclSet(HIGH);                                               //  sclSet(LOW)
+        sclSet(HIGH); //  sclSet(LOW)
         delayMicroseconds(5);
         sclSet(LOW);
-    } else {                // send NAK
-        sclSet(LOW);                                                // sclSet(HIGH)
-        sdaSet(HIGH);                                               // sdaSet(LOW)
+    } else {          // send NAK
+        sclSet(LOW);  // sclSet(HIGH)
+        sdaSet(HIGH); // sdaSet(LOW)
         delayMicroseconds(5);
-        sclSet(HIGH);                                               //  sclSet(LOW)
+        sclSet(HIGH); //  sclSet(LOW)
         delayMicroseconds(5);
         sclSet(LOW);
         sendStop();
     }
+    EXIT_CRITICAL();
     return dta;
 }
 
