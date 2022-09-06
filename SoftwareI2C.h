@@ -40,6 +40,10 @@
     #define uchar unsigned char
 #endif
 
+#ifdef USE_FREERTOS
+#include <Seeed_Arduino_ooFreeRTOS.h>
+#endif
+
 class SoftwareI2C {
   private:
 
@@ -49,7 +53,9 @@ class SoftwareI2C {
     int recv_len;
 
     int sda_in_out;
-
+#ifdef USE_FREERTOS
+    static SemaphoreHandle_t lock;
+#endif
   private:
 
     inline void sdaSet(uchar ucDta);

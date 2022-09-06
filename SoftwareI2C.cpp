@@ -24,11 +24,12 @@
 #include <Arduino.h>
 #ifdef USE_FREERTOS
 #include <Seeed_Arduino_ooFreeRTOS.h>
-#define ENTER_CRITICAL() portENTER_CRITICAL()
-#define EXIT_CRITICAL() portEXIT_CRITICAL()
+SemaphoreHandle_t SoftwareI2C::lock = NULL;
+#define I2C_LOCK() xSemaphoreTake(SoftwareI2C::lock, portMAX_DELAY);
+#define I2C_UNLOCK() xSemaphoreGive(SoftwareI2C::lock);
 #else
-#define ENTER_CRITICAL()
-#define EXIT_CRITICAL()
+#define I2C_LOCK()
+#define I2C_UNLOCK()
 #endif
 /*************************************************************************************************
     Function Name: begin
@@ -39,7 +40,9 @@
 void SoftwareI2C::begin(int Sda, int Scl) {
     pinSda = Sda;
     pinScl = Scl;
-
+    if (SoftwareI2C::lock == NULL) {
+        SoftwareI2C::lock = xSemaphoreCreateMutex();
+    }
     pinMode(pinScl, OUTPUT);
     pinMode(pinSda, OUTPUT);
     sda_in_out = OUTPUT;
@@ -157,10 +160,10 @@ uchar SoftwareI2C::sendByteAck(uchar ucDta) {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::beginTransmission(uchar addr) {
-    ENTER_CRITICAL();
+    I2C_LOCK();
     sendStart();                        // start signal
     uchar ret = sendByteAck(addr << 1); // send write address and get ack
-    EXIT_CRITICAL();
+    I2C_UNLOCK();
     // sclSet(LOW);
     return ret;
 }
@@ -183,9 +186,9 @@ uchar SoftwareI2C::endTransmission() {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::write(uchar dta) {
-    ENTER_CRITICAL();
+    I2C_LOCK();
     uchar ret = sendByteAck(dta);
-    EXIT_CRITICAL();
+    I2C_UNLOCK();
     return ret;
 }
 
@@ -197,15 +200,11 @@ uchar SoftwareI2C::write(uchar dta) {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::write(const uchar *dta, const uchar len) {
-    ENTER_CRITICAL();
     for (int i = 0; i < len; i++) {
-
         if (GETACK != write(dta[i])) {
-            EXIT_CRITICAL();
             return GETNAK;
         }
     }
-    EXIT_CRITICAL();
     return GETACK;
 }
 
@@ -217,11 +216,11 @@ uchar SoftwareI2C::write(const uchar *dta, const uchar len) {
     Return: 0: get nak  1: get ack
 *************************************************************************************************/
 uchar SoftwareI2C::requestFrom(uchar addr, uchar len) {
-    ENTER_CRITICAL();
+    I2C_LOCK();
     sendStart();                              // start signal
     uchar ret = sendByteAck((addr << 1) + 1); // send write address and get ack
     // sclSet(LOW);
-    EXIT_CRITICAL();
+    I2C_UNLOCK();
     if (ret == GETNAK) {
         recv_len = 0;
         return 0;
@@ -240,7 +239,7 @@ uchar SoftwareI2C::read() {
     if (!recv_len) {
         return 0;
     }
-    ENTER_CRITICAL();
+    I2C_LOCK();
     uchar ucRt = 0;
     sclSet(LOW);
     pinMode(pinSda, INPUT);
@@ -275,7 +274,7 @@ uchar SoftwareI2C::read() {
         sclSet(LOW);
         sendStop();
     }
-    EXIT_CRITICAL();
+    I2C_UNLOCK();
     return dta;
 }
 
