@@ -40,9 +40,11 @@ SemaphoreHandle_t SoftwareI2C::lock = NULL;
 void SoftwareI2C::begin(int Sda, int Scl) {
     pinSda = Sda;
     pinScl = Scl;
+#ifdef USE_FREERTOS
     if (SoftwareI2C::lock == NULL) {
         SoftwareI2C::lock = xSemaphoreCreateMutex();
     }
+#endif
     pinMode(pinScl, OUTPUT);
     pinMode(pinSda, OUTPUT);
     sda_in_out = OUTPUT;
