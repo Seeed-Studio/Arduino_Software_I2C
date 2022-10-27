@@ -85,7 +85,7 @@ void SoftwareI2C::sclSet(uchar ucDta) {
 *************************************************************************************************/
 uchar SoftwareI2C::getAck(void) {
     sclSet(LOW);
-    pinMode(pinSda, INPUT);
+    pinMode(pinSda, INPUT_PULLUP);
     sda_in_out = INPUT;
     delayMicroseconds(5);
     sclSet(HIGH);
